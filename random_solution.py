@@ -33,7 +33,7 @@ def random_solution(problem):
 
 
 if __name__ == "__main__":
-    problem = parse_input("hashcode_2015_final_round.in")
+    problem = Problem("hashcode_2015_final_round.in")
     solution = random_solution(problem)
     save_solution(solution, "random.txt")
     print(score(problem, solution))

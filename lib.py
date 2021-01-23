@@ -2,50 +2,53 @@ from dataclasses import dataclass
 from typing import List, Tuple, Dict
 import matplotlib.pyplot as plt
 import random
+from time import time
 
 random.seed(2000)
 
 
 @dataclass
 class Problem:
-    R: int
-    C: int
-    A: int
-    L: int
-    V: int
-    B: int
-    T: int
-    starting_cell: None
-    target_cells: None
-    wind_vectors: None
+    def __init__(self, filename):
+        with open(filename) as f:
+            R, C, A = [int(i) for i in f.readline().split()]
+            L, V, B, T = [int(i) for i in f.readline().split()]
+            starting_cell = tuple([int(i) for i in f.readline().split()][::-1])
+            target_cells = []
+            for _ in range(L):
+                target_cells.append(tuple([int(i) for i in f.readline().split()][::-1]))
+            wind_vectors = dict()
+            for z in range(A):
+                for y in range(R):
+                    pairs = [int(i) for i in f.readline().split()]
+                    for x in range(C):
+                        wind_vectors[(x, y, z + 1)] = (pairs[2 * x + 1], pairs[2 * x])
+                        
+        self.R = R
+        self.C = C
+        self.A = A
+        self.L = L
+        self.V = V
+        self.B = B
+        self.T = T
+        self.starting_cell = starting_cell
+        self.target_cells = target_cells
+        self.wind_vectors = wind_vectors
+        self.covered_squares = self.compute_covered_squares()
 
+    def compute_covered_squares(self):
+        radius = self.V
+        covered_squares = {}
+        for x in range(self.C):
+            for y in range(self.R):
+                cells = []
+                for i in range(-radius, radius + 1):
+                    for j in range(-radius, radius + 1):
+                        if i ** 2 + j ** 2 < radius ** 2:
+                            cells.append(((x + i) % self.C, y + j))
+                covered_squares[(x,y)] = cells
+        return covered_squares
 
-def parse_input(filename):
-    with open(filename) as f:
-        R, C, A = [int(i) for i in f.readline().split()]
-        L, V, B, T = [int(i) for i in f.readline().split()]
-        starting_cell = tuple([int(i) for i in f.readline().split()][::-1])
-        target_cells = []
-        for _ in range(L):
-            target_cells.append(tuple([int(i) for i in f.readline().split()][::-1]))
-        wind_vectors = dict()
-        for z in range(A):
-            for y in range(R):
-                pairs = [int(i) for i in f.readline().split()]
-                for x in range(C):
-                    wind_vectors[(x, y, z + 1)] = (pairs[2 * x + 1], pairs[2 * x])
-        return Problem(
-            R,
-            C,
-            A,
-            L,
-            V,
-            B,
-            T,
-            starting_cell,
-            target_cells,
-            wind_vectors,
-        )
 
 
 class Balloon(object):
@@ -129,27 +132,18 @@ def distance_sq(x, y, bx, by, C):
     return (y - by) ** 2 + coldist(x, bx, C) ** 2
 
 
-def covered_squares(x, y, radius, C):
-    cells = []
-    for i in range(-radius, radius + 1):
-        for j in range(-radius, radius + 1):
-            if i ** 2 + j ** 2 < radius ** 2:
-                cells.append(((x + i) % C, y + j))
-    return cells
-
-
 def current_score(balloons, target_cells, problem):
-    radius = problem.V
     covered_cells = set()
     for b in balloons:
-        bx, by = b.position
-        covered_cells.update(covered_squares(bx, by, radius, problem.C))
+        if b.is_live:
+            covered_cells.update(problem.covered_squares[b.position])
     
     return len(covered_cells.intersection(target_cells))
 
 
 
 def score(problem, turn_instructions):
+    # start = time()
     target_cells_set = set(problem.target_cells)
     turns = problem.T
 
@@ -167,6 +161,7 @@ def score(problem, turn_instructions):
             balloon.move(instructions[i])
         score += current_score(balloons, target_cells_set, problem)
 
+    # print(time() - start)
     return score
 
 
@@ -181,7 +176,7 @@ def test(problem):
 
 
 if __name__ == "__main__":
-    problem = parse_input("hashcode_2015_final_round.in")
+    problem = Problem("hashcode_2015_final_round.in")
     solution = random_solution(problem)
     save_solution(solution, "random.txt")
     print(score(problem, solution))
