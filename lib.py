@@ -145,7 +145,7 @@ def current_score(balloons, target_cells, problem):
 def score(problem, turn_instructions):
     # start = time()
     target_cells_set = set(problem.target_cells)
-    turns = problem.T
+    assert len(turn_instructions) == problem.T
 
     score = 0
 
