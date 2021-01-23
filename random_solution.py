@@ -120,16 +120,28 @@ def distance_sq(x, y, bx, by, C):
     return (y - by)**2 + coldist(x, bx, C)**2
 
 
+def covered_squares(x, y, radius, C):
+    cells = []
+    for i in range(-radius, radius+1):
+        for j in range(-radius, radius+1):
+            if i**2 + j**2 < radius**2:
+                cells.append(((x + i) % C, y + j))
+    return cells
+
+
 def current_score(balloons, target_cells, problem):
     radius = problem.V
     score = 0
-    for x, y in target_cells:
-        for b in balloons:
-            bx, by = b.position
-            if distance_sq(x, y, bx, by, problem.C) < radius**2:
-                score += 1
-                break
-    return score
+    target_cell_is_covered = {
+        cell: 0 for cell in target_cells
+    }
+    for b in balloons:
+        bx, by = b.position
+        for square in covered_squares(bx, by, radius, problem.C):
+            if square in target_cell_is_covered:
+                target_cell_is_covered[square] = 1
+
+    return sum(target_cell_is_covered.values())
 
 
 def score(problem, instructions):
@@ -145,7 +157,7 @@ def score(problem, instructions):
 
     for turn in range(turns):
         for i, balloon in enumerate(balloons):
-            balloon.move(instructions[turn+i])
+            balloon.move(instructions[problem.B*turn+i])
         score += current_score(balloons, target_cells, problem)
 
     return score
