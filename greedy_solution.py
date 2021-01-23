@@ -7,8 +7,7 @@ random.seed(2000)
 
 from lib import * 
 
-
-def random_solution(problem):
+def greedy_solution(problem):
     balloons = [
         Balloon(
             problem.starting_cell, problem.wind_vectors, problem.R, problem.C, problem.A
@@ -34,7 +33,7 @@ def random_solution(problem):
 
 if __name__ == "__main__":
     problem = parse_input("hashcode_2015_final_round.in")
-    solution = random_solution(problem)
+    solution = greedy_solution(problem)
     save_solution(solution, "random.txt")
     print(score(problem, solution))
 
