@@ -56,24 +56,33 @@ def greedy_solution(problem):
     return instructions
 
 
+def visualise(problem, solution):
+    plt.scatter(
+        [p[0] for p in problem.target_cells], [p[1] for p in problem.target_cells]
+    )
+
+    balloons = [
+        Balloon(
+            problem.starting_cell, problem.wind_vectors, problem.R, problem.C, problem.A
+        )
+        for _ in range(problem.B)
+    ]
+
+    paths = [list() for _ in range(problem.B)]
+    for turn, instructions in enumerate(solution):
+        for i, balloon in enumerate(balloons):
+            pos, _ = balloon.move(instructions[i])
+            paths[i].append(pos)
+
+    for path in paths:
+        plt.plot([p[0] for p in path], [p[1] for p in path])
+    plt.show()
+
+
+
 if __name__ == "__main__":
     problem = parse_input("hashcode_2015_final_round.in")
     solution = greedy_solution(problem)
     save_solution(solution, "greedy.txt")
+    visualise(problem, solution)
     print(score(problem, solution))
-
-
-def visualise(problem):
-    plt.scatter(
-        [p[0] for p in problem.target_cells], [p[1] for p in problem.target_cells]
-    )
-    altitude = 7
-    x, y, u, v = [], [], [], []
-    for xi in range(problem.C):
-        for yi in range(problem.R):
-            x.append(xi)
-            y.append(yi)
-            u.append(problem.wind_vectors[(xi, yi, altitude)][0])
-            v.append(problem.wind_vectors[(xi, yi, altitude)][1])
-    plt.quiver(x, y, u, v)
-    plt.show()
