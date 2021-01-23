@@ -2,7 +2,9 @@ from dataclasses import dataclass
 from typing import List, Tuple, Dict
 import matplotlib.pyplot as plt
 import random
+
 random.seed(2000)
+
 
 @dataclass
 class Problem:
@@ -31,10 +33,10 @@ def parse_input(filename):
             for y in range(R):
                 pairs = [int(i) for i in f.readline().split()]
                 for x in range(C):
-                    wind_vectors[(x, y, z+1)] = (pairs[2*x+1], pairs[2*x])
+                    wind_vectors[(x, y, z + 1)] = (pairs[2 * x + 1], pairs[2 * x])
         return Problem(
             R,
-            C, 
+            C,
             A,
             L,
             V,
@@ -44,6 +46,7 @@ def parse_input(filename):
             target_cells,
             wind_vectors,
         )
+
 
 class Balloon(object):
     def __init__(self, starting_cell, wind_vectors, R, C, A):
@@ -73,7 +76,10 @@ class Balloon(object):
         else:
             wind_vec = (0, 0)
 
-        new_position = ((self.position[0] + wind_vec[0]) % self.C, (self.position[1] + wind_vec[1]))
+        new_position = (
+            (self.position[0] + wind_vec[0]) % self.C,
+            (self.position[1] + wind_vec[1]),
+        )
         if update:
             self.position = new_position
             self.altitude = new_altitude
@@ -84,9 +90,12 @@ class Balloon(object):
 
         return new_position, new_altitude
 
+
 def random_solution(problem):
     balloons = [
-        Balloon(problem.starting_cell, problem.wind_vectors, problem.R, problem.C, problem.A)
+        Balloon(
+            problem.starting_cell, problem.wind_vectors, problem.R, problem.C, problem.A
+        )
         for _ in range(problem.B)
     ]
     for turn in range(problem.T):
@@ -102,12 +111,13 @@ def random_solution(problem):
 
     instructions = []
     for turn in range(problem.T):
-        instructions += [b.instructions[turn] for b in balloons]
+        instructions.append([b.instructions[turn] for b in balloons])
     return instructions
 
 
-def save_solution(instructions, filename):
+def save_solution(turn_instructions, filename):
     with open(filename, "w") as f:
+        for instructions in turn_instructions:
             print(" ".join([str(i) for i in instructions]), file=f)
 
 
@@ -116,14 +126,14 @@ def coldist(x, bx, C):
 
 
 def distance_sq(x, y, bx, by, C):
-    return (y - by)**2 + coldist(x, bx, C)**2
+    return (y - by) ** 2 + coldist(x, bx, C) ** 2
 
 
 def covered_squares(x, y, radius, C):
     cells = []
-    for i in range(-radius, radius+1):
-        for j in range(-radius, radius+1):
-            if i**2 + j**2 < radius**2:
+    for i in range(-radius, radius + 1):
+        for j in range(-radius, radius + 1):
+            if i ** 2 + j ** 2 < radius ** 2:
                 cells.append(((x + i) % C, y + j))
     return cells
 
@@ -131,9 +141,7 @@ def covered_squares(x, y, radius, C):
 def current_score(balloons, target_cells, problem):
     radius = problem.V
     score = 0
-    target_cell_is_covered = {
-        cell: 0 for cell in target_cells
-    }
+    target_cell_is_covered = {cell: 0 for cell in target_cells}
     for b in balloons:
         bx, by = b.position
         for square in covered_squares(bx, by, radius, problem.C):
@@ -143,30 +151,33 @@ def current_score(balloons, target_cells, problem):
     return sum(target_cell_is_covered.values())
 
 
-def score(problem, instructions):
+def score(problem, turn_instructions):
     target_cells = problem.target_cells
     turns = problem.T
 
     score = 0
 
     balloons = [
-        Balloon(problem.starting_cell, problem.wind_vectors, problem.R, problem.C, problem.A)
+        Balloon(
+            problem.starting_cell, problem.wind_vectors, problem.R, problem.C, problem.A
+        )
         for _ in range(problem.B)
     ]
 
-    for turn in range(turns):
+    for turn, instructions in enumerate(turn_instructions):
         for i, balloon in enumerate(balloons):
-            balloon.move(instructions[problem.B*turn+i])
+            balloon.move(instructions[i])
         score += current_score(balloons, target_cells, problem)
 
     return score
 
-    
 
 def test(problem):
-    balloon = Balloon(problem.starting_cell, problem.wind_vectors, problem.R, problem.C, problem.A)
+    balloon = Balloon(
+        problem.starting_cell, problem.wind_vectors, problem.R, problem.C, problem.A
+    )
     balloon.move(1)
-    for i in range(problem.T-1):
+    for i in range(problem.T - 1):
         print(balloon.position, balloon.altitude, balloon.is_live)
         balloon.move(0)
 
@@ -177,8 +188,11 @@ if __name__ == "__main__":
     save_solution(solution, "random.txt")
     print(score(problem, solution))
 
-if False:
-    plt.scatter([p[0] for p in problem.target_cells], [p[1] for p in problem.target_cells])
+
+def visualise(problem):
+    plt.scatter(
+        [p[0] for p in problem.target_cells], [p[1] for p in problem.target_cells]
+    )
     altitude = 7
     x, y, u, v = [], [], [], []
     for xi in range(problem.C):
