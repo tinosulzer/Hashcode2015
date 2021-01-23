@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List, Tuple, Dict
 import matplotlib.pyplot as plt
 import random
-random.seed(1993)
+random.seed(2000)
 
 @dataclass
 class Problem:
@@ -108,8 +108,7 @@ def random_solution(problem):
 
 def save_solution(instructions, filename):
     with open(filename, "w") as f:
-        for instruction in instructions:
-            print(instruction, file=f)
+            print(" ".join([str(i) for i in instructions]), file=f)
 
 
 def coldist(x, bx, C):
