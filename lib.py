@@ -180,19 +180,3 @@ if __name__ == "__main__":
     solution = random_solution(problem)
     save_solution(solution, "random.txt")
     print(score(problem, solution))
-
-
-def visualise(problem):
-    plt.scatter(
-        [p[0] for p in problem.target_cells], [p[1] for p in problem.target_cells]
-    )
-    altitude = 7
-    x, y, u, v = [], [], [], []
-    for xi in range(problem.C):
-        for yi in range(problem.R):
-            x.append(xi)
-            y.append(yi)
-            u.append(problem.wind_vectors[(xi, yi, altitude)][0])
-            v.append(problem.wind_vectors[(xi, yi, altitude)][1])
-    plt.quiver(x, y, u, v)
-    plt.show()
