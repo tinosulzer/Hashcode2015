@@ -153,7 +153,7 @@ def score(problem, turn_instructions):
         Balloon(
             problem.starting_cell, problem.wind_vectors, problem.R, problem.C, problem.A
         )
-        for _ in range(problem.B)
+        for _ in range(len(turn_instructions[0]))
     ]
 
     for turn, instructions in enumerate(turn_instructions):
